@@ -1,5 +1,6 @@
 import java.io.File
 import java.io.FileFilter
+import java.io.InputStream
 import java.nio.file.FileSystem
 
 val ENDLINE = "\r\n"
@@ -48,6 +49,13 @@ fun main(args: Array<String>) {
     println("All found files $counter")
 
     // обработка файлов
+    fileList.forEach {
+        val filename = it.toString()
+        val inputStream: InputStream = File(filename).inputStream()
+        val inputString = inputStream.bufferedReader().use{ it.readText()}
+        println("===========================================================================================================================================================")
+        println(inputString)
+    }
 }
 
 
