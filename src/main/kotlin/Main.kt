@@ -1,18 +1,16 @@
 import java.io.File
-import java.io.FileFilter
 import java.io.InputStream
-import java.nio.file.FileSystem
 
 val ENDLINE = "\r\n"
 var path = "/home"
 var filemask = "\\*.txt"
-var fileList = mutableListOf<String>()
+var fileList = mutableListOf<MrskFile>()
 fun main(args: Array<String>) {
     println("======================= Find files =========================")
     println("=======================  v.2.0.0   =========================")
 
     // найти файл параметров программы
-    val file:File = File("params.config")
+    val file = File("params.config")
     if(!file.exists()){
         println("${file} - not found")
         file.createNewFile()
@@ -25,7 +23,7 @@ fun main(args: Array<String>) {
     }else{
         println("Read file ${file.absoluteFile}")
         file.readLines().forEach {
-            val line = it.toString()
+            val line = it
             if(line.split("=").get(0).equals("path",true)){
                 path = line.split("=").get(1)
             }
@@ -42,20 +40,49 @@ fun main(args: Array<String>) {
        val result = a.matches(it.absoluteFile.toString())
         if(result){
             counter++
-            fileList.add(it.absoluteFile.toString())
+            val filename =  it.absoluteFile.toString()
+            val inputStream: InputStream = File(filename).inputStream()
+            val inputString = inputStream.bufferedReader().use{ it.readText()}
+            fileList.add(MrskFile(filename,inputString))
             println(it.absoluteFile.toString())
         }
     }
     println("All found files $counter")
-
+    println("===========================================================================================================\n\r\n\r")
+    counter = 0
+    val str1 = """error: (e) => {
+              console.error(e);
+              this.#error(e);"""
+    val pstr1 = """error: (e) => {
+              this.#error(e);"""
+    val str2 = """catchError(() => EMPTY)"""
+    val pstr2 = """catchError((e) => {
+            this.#error(e);
+            return EMPTY;
+          })"""
     // обработка файлов
     fileList.forEach {
-        val filename = it.toString()
-        val inputStream: InputStream = File(filename).inputStream()
-        val inputString = inputStream.bufferedReader().use{ it.readText()}
-        println("===========================================================================================================================================================")
-        println(inputString)
+
+        var content = it.content
+        if(content.contains(str1)&&content.contains(str2)){
+            counter++
+            content = content.replace(str1,pstr1)
+            content = content.replace(str2,pstr2)
+            it.content = content
+            val filename = it.filename
+            val file = File(filename)
+            if(file.canWrite()){
+                println("=========>>>${it.filename}")
+                file.writeText(it.content)
+                println("Total space of file: ${file.totalSpace}")
+            }
+
+        }
     }
+    println("Founded files: $counter")
+    println("===========================================================================================================\n\r\n\r")
+
+
 }
 
 
