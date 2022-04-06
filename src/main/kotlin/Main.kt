@@ -4,7 +4,7 @@ import java.nio.file.FileSystem
 
 val ENDLINE = "\r\n"
 var path = "/home"
-var filemask = "*.txt"
+var filemask = "\\*.txt"
 var fileList = mutableListOf<String>()
 fun main(args: Array<String>) {
     println("======================= Find files =========================")
@@ -33,12 +33,21 @@ fun main(args: Array<String>) {
             }
         }
     }
+    val a = filemask.toRegex()
+    var counter = 0
+
     //output list of files
+    File(path).walk().forEach {
+       val result = a.matches(it.absoluteFile.toString())
+        if(result){
+            counter++
+            fileList.add(it.absoluteFile.toString())
+            println(it.absoluteFile.toString())
+        }
+    }
+    println("All found files $counter")
 
-
-
-
-
+    // обработка файлов
 }
 
 
